@@ -1,0 +1,10 @@
+http:
+  listener:
+    host: "localhost"
+    port: "8084"
+    path: ""
+  requester:
+    host: "localhost"
+    port: "8082"
+    routesPath: "/FastGo/routes"
+    schedulesPath: "/FastGo/schedules"

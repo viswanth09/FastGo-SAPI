@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="FastGo-GetSchedules-Implementation-SAPIFlow" doc:id="affef518-1a4f-464b-9233-f3e6744f9384" >
+		<http:request method="GET" doc:name="Request" doc:id="fbaf07fb-199c-4fb2-954a-442a19406b04" config-ref="HTTP_Request_configuration" path="${http.requester.schedulesPath}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	transactionId : vars.transactionId
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="96832c43-4a20-43a2-8ce6-b8272221776c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map{
+  "departureDateTime": $.DEPARTUREDATETIME,
+  "fromlocation": $.FROMLOCATION,
+  "toLocation": $.TOLOCATION,
+  "availableSeats": $.AVAILABLESEATS
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ddbfe483-d33b-41a6-8a6c-b3928c0dbcec" message="the immediate logger after mapping the requestor respone from external api for transactionId: #[vars.transactionId]"/>
+	</sub-flow>
+</mule>
