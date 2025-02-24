@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    
+    <flow name="retriveroutesandschedules-fastgo-sapi-main">
+        <http:listener config-ref="retriveroutesandschedules-fastgo-sapi" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="retriveroutesandschedules-fastgo-sapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <!-- [STUDIO:"retriveroutesandschedules-fastgo-sapi-console"]<flow name="retriveroutesandschedules-fastgo-sapi-console">
+        <http:listener config-ref="retriveroutesandschedules-fastgo-sapi" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200&#93;">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}&#93;&#93;&#93;></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500&#93;">
+                <http:body><![CDATA[#[payload&#93;&#93;&#93;></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}&#93;&#93;&#93;></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="retriveroutesandschedules-fastgo-sapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{message: "Resource not found"}&#93;&#93;></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow> [STUDIO] -->
+    <sub-flow name="retriveroutesandschedules-fastgo-sapiSub_Flow" doc:id="b04ad5f6-5c2b-4ddd-89e8-fe449451b3ff" >
+		<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="transportType"><![CDATA[attributes.uriParams.'transportType']]></ee:set-variable>
+                <ee:set-variable variableName="transportCompany"><![CDATA[attributes.uriParams.'transportCompany']]></ee:set-variable>
+				<ee:set-variable variableName="transactionId" ><![CDATA[attributes.headers.transactionId]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="55c1a519-25af-478c-ba38-56fb3c28c049" message="The Initial logger for transactionId: #[vars.transactionId] "/>
+	</sub-flow>
+	<flow name="get:\(transportType)\(transportCompany)\routes:retriveroutesandschedules-fastgo-sapi-config">
+		<flow-ref doc:name="Flow Reference" doc:id="fe3f5f87-ace3-48f3-8141-9e157f5e9822" name="retriveroutesandschedules-fastgo-sapiSub_Flow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="6b8584e1-a1ac-4870-8c8b-800c3c4f371b" message="This logger after getting hit by request for transactionId: #[vars.transactionId] "/>
+		<flow-ref doc:name="Flow Reference" doc:id="c9d0ca15-5044-4243-bb60-7f9a8e431d0c" name="FastGo-GetRoutes-Implementation-SAPIFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d9dfc8df-8176-45b8-862f-9f637e704fd1" message="This logger after getting request for transactionId: #[vars.transactionId] from external api"/>
+    </flow>
+    <flow name="get:\(transportType)\(transportCompany)\schedules:retriveroutesandschedules-fastgo-sapi-config">
+		<flow-ref doc:name="Flow Reference" doc:id="7d50ff7b-d27c-43e6-ad78-ce2c37bead00" name="retriveroutesandschedules-fastgo-sapiSub_Flow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="24a293ad-fae0-4e38-8d48-ecb6774e963a" message="This logger after getting hit by request for transactionId: #[vars.transactionId] "/>
+		<flow-ref doc:name="Flow Reference" doc:id="dd214536-4723-4e39-ae6e-221f54b184b1" name="FastGo-GetSchedules-Implementation-SAPIFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3fbe79e8-02cb-462a-85a6-55de4ff80bad" message="This logger after getting request for transactionId: #[vars.transactionId] from external api"/>
+    </flow>
+</mule>

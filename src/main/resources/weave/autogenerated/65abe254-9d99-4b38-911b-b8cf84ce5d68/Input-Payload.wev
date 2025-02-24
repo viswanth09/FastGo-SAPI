@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_65abe254_9d99_4b38_911b_b8cf84ce5d68_Input_Payload = Array<{  arrivalLocationCode: String,   departureLocationCode: String,   _?: Any}>
+
